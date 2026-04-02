@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ZNL Bearings — MOM System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Mono:wght@400;500&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0d0f14;--sur:#151820;--sur2:#1c2030;--bdr:rgba(255,255,255,0.07);--bdr2:rgba(255,255,255,0.13);--gold:#c9a84c;--goldl:#e8cc7e;--goldd:rgba(201,168,76,0.15);--red:#e05c5c;--redd:rgba(224,92,92,0.15);--grn:#5cb88e;--grnd:rgba(92,184,142,0.15);--blu:#5c9ee0;--blud:rgba(92,158,224,0.15);--t1:#e8e8e8;--t2:#8a8fa8;--t3:#555a70;--r:10px;--rl:16px}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;font-size:14px;line-height:1.6}
+.app{display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--sur);border-bottom:1px solid var(--bdr);padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo-name{font-family:'DM Serif Display',serif;font-size:16px;color:var(--gold)}
+.logo-sub{font-size:10px;color:var(--t3);letter-spacing:.08em;text-transform:uppercase}
+.tabs{display:flex;gap:4px}
+.tab{padding:7px 14px;border-radius:var(--r);font-size:12px;cursor:pointer;border:1px solid transparent;color:var(--t3);background:none;font-family:'Outfit',sans-serif;transition:.15s;min-height:36px}
+.tab.on{background:var(--goldd);color:var(--gold);border-color:rgba(201,168,76,.25)}
+.body{flex:1;padding:20px;max-width:720px;margin:0 auto;width:100%}
+.steps{display:flex;margin-bottom:20px;border-radius:var(--r);overflow:hidden;border:1px solid var(--bdr)}
+.si{flex:1;padding:10px 8px;font-size:11px;font-weight:500;text-align:center;color:var(--t3);background:var(--sur);border-right:1px solid var(--bdr)}
+.si:last-child{border-right:none}
+.si.on{background:var(--goldd);color:var(--gold)}
+.si.dn{background:var(--grnd);color:var(--grn)}
+.card{background:var(--sur);border:1px solid var(--bdr);border-radius:var(--rl);padding:18px 20px;margin-bottom:14px}
+.ct{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:14px;font-weight:500}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.fld{display:flex;flex-direction:column;gap:5px}
+.fld label{font-size:10px;color:var(--t3);letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+input,select,textarea{background:var(--sur2);border:1px solid var(--bdr2);border-radius:var(--r);padding:10px 13px;color:var(--t1);font-family:'Outfit',sans-serif;font-size:14px;outline:none;transition:border .15s;width:100%;-webkit-appearance:none}
+input:focus,textarea:focus{border-color:var(--gold)}
+textarea{resize:vertical;min-height:80px}
+.btn{padding:11px 18px;border-radius:var(--r);font-size:14px;font-family:'Outfit',sans-serif;font-weight:500;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur2);color:var(--t1);transition:.15s;display:inline-flex;align-items:center;gap:8px;min-height:44px;touch-action:manipulation}
+.btn:active{transform:scale(.97);opacity:.85}
+.btn-gold{background:var(--gold);color:#0d0f14;border-color:var(--gold);font-weight:600}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.rec-box{display:flex;align-items:center;gap:16px;padding:18px 20px;background:var(--sur2);border-radius:var(--r);border:1px solid var(--bdr);margin-bottom:14px}
+.dot{width:14px;height:14px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:.3s}
+.dot.live{background:var(--red);animation:blink 1s infinite}
+.dot.dn{background:var(--grn);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+.timer{font-family:'DM Mono',monospace;font-size:30px;font-weight:500;color:var(--t1);flex:1}
+.rstat{font-size:12px;color:var(--t3);text-align:right}
+.end-sec{background:var(--redd);border:2px solid rgba(224,92,92,.5);border-radius:var(--rl);padding:20px;margin-bottom:14px;text-align:center}
+.end-lbl{font-size:13px;color:var(--red);margin-bottom:12px;font-weight:500}
+.btn-end{width:100%;padding:18px;font-size:17px;font-weight:700;background:#c0392b;color:#fff;border:none;border-radius:var(--r);cursor:pointer;font-family:'Outfit',sans-serif;display:flex;align-items:center;justify-content:center;gap:10px;min-height:60px;touch-action:manipulation;letter-spacing:.02em;box-shadow:0 4px 24px rgba(192,57,43,.4)}
+.btn-end:active{transform:scale(.96);background:#a93226}
+.tbox{background:var(--sur2);border:1px solid var(--bdr);border-radius:var(--r);padding:14px;min-height:100px;max-height:200px;overflow-y:auto;font-size:13px;line-height:1.8;color:var(--t2);word-break:break-word}
+.interim{color:var(--t3);font-style:italic}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.tag{background:var(--blud);color:var(--blu);border:1px solid rgba(92,158,224,.2);padding:5px 11px;border-radius:20px;font-size:12px;display:flex;align-items:center;gap:6px}
+.tag button{background:none;border:none;cursor:pointer;color:var(--blu);font-size:14px;line-height:1;padding:0;min-width:22px;min-height:22px}
+.trow{display:grid;grid-template-columns:1fr 34px;gap:8px;margin-bottom:8px;align-items:start}
+.lp{display:flex;gap:6px;flex-wrap:wrap}
+.lpill{padding:8px 14px;border-radius:20px;font-size:13px;cursor:pointer;border:1px solid var(--bdr2);background:var(--sur2);color:var(--t2);min-height:38px;touch-action:manipulation}
+.lpill.on{background:var(--goldd);color:var(--gold);border-color:rgba(201,168,76,.4);font-weight:500}
+.mom-out{background:var(--sur2);border:1px solid var(--bdr);border-radius:var(--r);padding:16px;font-size:13px;line-height:1.85;color:var(--t1);white-space:pre-wrap;max-height:500px;overflow-y:auto;word-break:break-word}
+.al{padding:11px 14px;border-radius:var(--r);font-size:13px;margin-bottom:12px;display:flex;align-items:flex-start;gap:8px;line-height:1.5}
+.al-g{background:var(--goldd);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.al-b{background:var(--blud);color:var(--blu);border:1px solid rgba(92,158,224,.2)}
+.al-r{background:var(--redd);color:var(--red);border:1px solid rgba(224,92,92,.2)}
+.al-gr{background:var(--grnd);color:var(--grn);border:1px solid rgba(92,184,142,.2)}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(92,158,224,.3);border-top-color:var(--blu);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hi{padding:14px 16px;border-radius:var(--r);border:1px solid var(--bdr);background:var(--sur2);margin-bottom:9px;cursor:pointer}
+.hi:active{border-color:var(--gold)}
+.hm{font-size:11px;color:var(--t3);font-family:'DM Mono',monospace;margin-bottom:3px}
+.ht{font-size:14px;font-weight:500}
+.ss{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--bdr)}
+.ss:last-child{border-bottom:none}
+.sn{width:26px;height:26px;border-radius:50%;background:var(--goldd);color:var(--gold);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Mono',monospace}
+.sc strong{display:block;margin-bottom:3px;font-weight:500;color:var(--t1);font-size:13px}
+.sc p{font-size:12px;color:var(--t3);line-height:1.6}
+code{background:var(--sur2);padding:2px 6px;border-radius:5px;font-family:'DM Mono',monospace;font-size:11px;color:var(--goldl);border:1px solid var(--bdr2)}
+pre{background:var(--sur2);border:1px solid var(--bdr);border-radius:var(--r);padding:12px;font-family:'DM Mono',monospace;font-size:11px;color:var(--t2);overflow-x:auto;margin-top:8px;line-height:1.7;white-space:pre-wrap;word-break:break-all}
+a{color:var(--blu)}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:10px}
+@media(max-width:500px){.g2,.g3{grid-template-columns:1fr}.timer{font-size:24px}.tabs .tab{padding:6px 10px;font-size:11px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div><div class="logo-name">ZNL Bearings</div><div class="logo-sub">MOM System</div></div>
+    <div class="tabs">
+      <button class="tab on" id="tab-mtg" onclick="showTab('mtg')">Meeting</button>
+      <button class="tab" id="tab-hist" onclick="showTab('hist')">History</button>
+      <button class="tab" id="tab-setup" onclick="showTab('setup')">Setup</button>
+    </div>
+  </div>
+
+  <div class="body">
+
+    <!-- MEETING TAB -->
+    <div id="tab-mtg-body">
+      <div class="steps">
+        <div class="si on" id="st1">① Setup</div>
+        <div class="si" id="st2">② Record</div>
+        <div class="si" id="st3">③ MOM</div>
+      </div>
+
+      <!-- P1 -->
+      <div id="pn1">
+        <div class="card">
+          <div class="ct">Meeting Details</div>
+          <div class="g2" style="margin-bottom:12px">
+            <div class="fld"><label>Title *</label><input id="m-title" placeholder="e.g. Q2 Sales Review"></div>
+            <div class="fld"><label>Venue</label><input id="m-venue" placeholder="Board Room / Zoom"></div>
+          </div>
+          <div class="g3" style="margin-bottom:12px">
+            <div class="fld"><label>Date</label><input type="date" id="m-date"></div>
+            <div class="fld"><label>Chairperson</label><input id="m-chair" placeholder="CEO Sir"></div>
+            <div class="fld"><label>Meeting No.</label><input id="m-no" placeholder="05-2026-C-0001"></div>
+          </div>
+          <div class="fld"><label>Company</label><input id="m-co" value="ZNL Bearings Pvt. Ltd"></div>
+        </div>
+        <div class="card">
+          <div class="ct">Agenda</div>
+          <div class="al al-g">⚡ Sirf agenda daalo — baaki sab mic se AI lega</div>
+          <textarea id="m-agenda" rows="4" placeholder="1. Sales review&#10;2. Pricing discussion&#10;3. New orders&#10;4. Any other matters"></textarea>
+        </div>
+        <div class="card">
+          <div class="ct">Attendees (Optional)</div>
+          <div style="display:flex;gap:8px">
+            <input id="att-in" placeholder="Name (Role)" style="flex:1">
+            <button class="btn" onclick="addAtt()">+ Add</button>
+          </div>
+          <div class="tags" id="att-tags"></div>
+        </div>
+        <div class="card">
+          <div class="ct">MOM Language</div>
+          <div class="lp">
+            <div class="lpill on" onclick="setLang(this,'English')">English</div>
+            <div class="lpill" onclick="setLang(this,'Hindi')">हिंदी</div>
+            <div class="lpill" onclick="setLang(this,'Gujarati')">ગુજરાતી</div>
+            <div class="lpill" onclick="setLang(this,'Chinese')">中文</div>
+            <div class="lpill" onclick="setLang(this,'German')">Deutsch</div>
+          </div>
+        </div>
+        <button class="btn btn-gold" onclick="goP(2)" style="width:100%;justify-content:center;font-size:15px;padding:14px">Start Meeting →</button>
+      </div>
+
+      <!-- P2 -->
+      <div id="pn2" style="display:none">
+        <div class="card">
+          <div class="ct">Live Status</div>
+          <div class="rec-box">
+            <div class="dot" id="rdot"></div>
+            <div class="timer" id="rtimer">00:00:00</div>
+            <div class="rstat" id="rstat">Ready</div>
+          </div>
+          <div class="al al-r" id="mic-warn" style="display:none">⚠ Mic nahi mila. Neeche manually notes likho.</div>
+          <div class="btn-row">
+            <button class="btn btn-gold" id="btn-rec" onclick="handleRec()" style="flex:1;justify-content:center">▶ Start Recording</button>
+            <button class="btn" onclick="goP(1)">← Back</button>
+          </div>
+        </div>
+
+        <!-- BIG END BUTTON -->
+        <div class="end-sec" id="end-sec" style="display:none">
+          <div class="end-lbl">Meeting khatam? Yeh dabao:</div>
+          <button class="btn-end" id="btn-end-main" onclick="doEnd()">
+            ⬛ &nbsp;End Meeting &amp; Generate MOM
+          </button>
+        </div>
+
+        <div class="card">
+          <div class="ct">Live Transcript</div>
+          <div class="tbox" id="tbox">Recording shuru karo...</div>
+          <div class="fld" style="margin-top:12px">
+            <label>Manual Notes</label>
+            <textarea id="mnotes" placeholder="Kuch miss hua to yahan likho..."></textarea>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ct">Action Items</div>
+          <div id="tasklist"></div>
+          <button class="btn" onclick="addTask()" style="font-size:12px;margin-top:4px">+ Task Add Karo</button>
+        </div>
+      </div>
+
+      <!-- P3 -->
+      <div id="pn3" style="display:none">
+        <div class="al al-b" id="gen-load" style="display:none"><span class="spin"></span>&nbsp;AI MOM generate kar raha hai...</div>
+        <div class="al al-gr" id="doc-ok" style="display:none"></div>
+        <div class="al al-r" id="doc-err" style="display:none"></div>
+        <div class="card">
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+            <button class="btn btn-gold" onclick="saveGDocs()">📄 Save to Google Docs</button>
+            <button class="btn" style="background:#2980b9;color:#fff;border-color:#2980b9" onclick="dlDoc()">⬇ Download .doc</button>
+            <button class="btn" onclick="cpMOM()">⎘ Copy</button>
+            <button class="btn" onclick="location.reload()">+ New</button>
+          </div>
+          <div class="mom-out" id="mom-out">...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORY TAB -->
+    <div id="tab-hist-body" style="display:none">
+      <div class="card"><div class="ct">MOM History</div><div id="hist-list"><p style="color:var(--t3);font-size:13px">Koi history nahi.</p></div></div>
+    </div>
+
+    <!-- SETUP TAB -->
+    <div id="tab-setup-body" style="display:none">
+      <div class="card">
+        <div class="ct">Google Docs Webhook</div>
+        <div class="al al-b" style="margin-bottom:12px">Neeche steps follow karo — sirf ek baar</div>
+        <div class="fld" style="margin-bottom:10px">
+          <label>Apps Script URL</label>
+          <input id="wh" placeholder="https://script.google.com/macros/s/.../exec" oninput="saveWH()">
+        </div>
+        <div id="wh-st" style="font-size:12px;color:var(--t3)"></div>
+      </div>
+      <div class="card">
+        <div class="ct">Setup Steps</div>
+        <div class="ss"><div class="sn">1</div><div class="sc"><strong>script.google.com kholo</strong><p><a href="https://script.google.com" target="_blank">script.google.com</a> → New Project click karo</p></div></div>
+        <div class="ss"><div class="sn">2</div><div class="sc"><strong>Yeh code paste karo (Code.gs mein)</strong>
+<pre id="gsc">function doPost(e){
+  try{
+    var d=JSON.parse(e.postData.contents);
+    var doc=DocumentApp.create(d.title||"MOM");
+    var b=doc.getBody(); b.clear();
+    var h=b.appendParagraph(d.company||"ZNL Bearings Pvt. Ltd");
+    h.setHeading(DocumentApp.ParagraphHeading.HEADING1);
+    h.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    h.editAsText().setFontSize(16).setBold(true);
+    var s=b.appendParagraph("Minutes of Meeting (MoM)");
+    s.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
+    s.editAsText().setFontSize(12).setItalic(true);
+    b.appendHorizontalRule();
+    var lines=d.mom.split('\n');
+    for(var i=0;i<lines.length;i++){
+      var l=lines[i];
+      if(!l.trim()){b.appendParagraph("");continue;}
+      if(l.match(/^(Tasks|Key Discussion|Meeting Adjourned|Minutes Prepared|Approved|Subject:|Date:|Time:|Venue:|Attendees:|Chairperson:|Meeting No\.)/)){
+        b.appendParagraph(l).editAsText().setBold(true).setFontSize(11);
+      }else{b.appendParagraph(l).editAsText().setFontSize(11);}
+    }
+    b.appendHorizontalRule();
+    b.appendParagraph("Generated: "+new Date().toLocaleString('en-IN')).editAsText().setFontSize(9).setForegroundColor('#888888').setItalic(true);
+    doc.saveAndClose();
+    return ContentService.createTextOutput(JSON.stringify({
+      success:true,
+      docUrl:"https://docs.google.com/document/d/"+doc.getId()+"/edit"
+    })).setMimeType(ContentService.MimeType.JSON);
+  }catch(err){
+    return ContentService.createTextOutput(JSON.stringify({success:false,error:err.toString()})).setMimeType(ContentService.MimeType.JSON);
+  }
+}</pre>
+<button class="btn btn-gold" onclick="cpScript()" style="margin-top:8px;font-size:12px">⎘ Copy Script</button>
+        </div></div>
+        <div class="ss"><div class="sn">3</div><div class="sc"><strong>Deploy as Web App</strong><p>Deploy → New deployment → Type: Web app → Execute as: Me → Access: Anyone → Deploy</p></div></div>
+        <div class="ss"><div class="sn">4</div><div class="sc"><strong>URL paste karo upar</strong><p>URL format: <code>https://script.google.com/macros/s/.../exec</code></p></div></div>
+      </div>
+      <div class="card">
+        <div class="ct">Default Settings</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="g2">
+            <div class="fld"><label>Company</label><input id="s-co" value="ZNL Bearings Pvt. Ltd" onchange="setSt('company',this.value)"></div>
+            <div class="fld"><label>Chairperson</label><input id="s-ch" placeholder="CEO Sir" onchange="setSt('chair',this.value)"></div>
+          </div>
+          <div class="fld"><label>EA Name (Minutes by)</label><input id="s-ea" placeholder="Vaibhav Suthar, EA to CEO" onchange="setSt('ea',this.value)"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+var lang='English',timerSec=0,timerInt=null,recog=null,isRec=false;
+var transcript='',mStart='',mEnd='',curMOM='';
+var history=[],settings={};
+try{history=JSON.parse(localStorage.getItem('znl_h')||'[]')}catch(e){}
+try{settings=JSON.parse(localStorage.getItem('znl_s')||'{}')}catch(e){}
+
+window.onload=function(){
+  document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
+  if(settings.company){document.getElementById('m-co').value=settings.company;document.getElementById('s-co').value=settings.company}
+  if(settings.chair){document.getElementById('m-chair').value=settings.chair;document.getElementById('s-ch').value=settings.chair}
+  if(settings.ea)document.getElementById('s-ea').value=settings.ea;
+  var wh=localStorage.getItem('znl_wh');
+  if(wh){document.getElementById('wh').value=wh;showWHst(wh)}
+  // Attendee enter key
+  document.getElementById('att-in').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();addAtt()}});
+};
+
+function showTab(n){
+  ['mtg','hist','setup'].forEach(function(x){
+    document.getElementById('tab-'+x+'-body').style.display=x===n?'block':'none';
+    document.getElementById('tab-'+x).classList.toggle('on',x===n);
+  });
+  if(n==='hist')renderHist();
+}
+
+function goP(n){
+  if(n===2&&!document.getElementById('m-title').value.trim()){alert('Meeting title daalo!');return}
+  if(n===1&&isRec)pauseRec();
+  for(var i=1;i<=3;i++){
+    document.getElementById('pn'+i).style.display=i===n?'block':'none';
+    document.getElementById('st'+i).className='si'+(i<n?' dn':i===n?' on':'');
+  }
+}
+
+function setLang(el,l){lang=l;document.querySelectorAll('.lpill').forEach(function(p){p.classList.remove('on')});el.classList.add('on')}
+
+function addAtt(){
+  var inp=document.getElementById('att-in');
+  var name=inp.value.trim();if(!name)return;
+  var t=document.createElement('span');t.className='tag';
+  t.innerHTML=name+'<button onclick="this.parentElement.remove()">×</button>';
+  document.getElementById('att-tags').appendChild(t);inp.value='';
+}
+
+function addTask(){
+  var d=document.createElement('div');d.className='trow';
+  d.innerHTML='<input placeholder="Task — Assigned to — Due date" style="font-size:12px"><button class="btn" onclick="this.parentElement.remove()" style="padding:8px;min-height:40px">×</button>';
+  document.getElementById('tasklist').appendChild(d);
+}
+
+function pad(n){return String(n).padStart(2,'0')}
+function fmt(s){return pad(Math.floor(s/3600))+':'+pad(Math.floor(s%3600/60))+':'+pad(s%60)}
+
+function handleRec(){if(!isRec)startRec();else pauseRec()}
+
+// END MEETING — NO CONFIRM BOX, DIRECT ACTION
+function doEnd(){
+  isRec=false;
+  if(recog){try{recog.stop()}catch(e){}recog=null}
+  clearInterval(timerInt);timerInt=null;
+  var now=new Date();
+  mEnd=pad(now.getHours())+':'+pad(now.getMinutes());
+  document.getElementById('rdot').className='dot dn';
+  document.getElementById('rstat').textContent='Meeting ended';
+  goP(3);
+  generateMOM();
+}
+
+function startRec(){
+  isRec=true;
+  var now=new Date();
+  if(!mStart)mStart=pad(now.getHours())+':'+pad(now.getMinutes());
+  document.getElementById('rdot').className='dot live';
+  document.getElementById('rstat').textContent='Recording...';
+  document.getElementById('btn-rec').textContent='⏸ Pause';
+  document.getElementById('end-sec').style.display='block';
+  if(!timerInt)timerInt=setInterval(function(){timerSec++;document.getElementById('rtimer').textContent=fmt(timerSec)},1000);
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('mic-warn').style.display='flex';return}
+  recog=new SR();recog.continuous=true;recog.interimResults=true;recog.lang='hi-IN';
+  var itr='';
+  recog.onresult=function(e){
+    var fin='';itr='';
+    for(var i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal)fin+=e.results[i][0].transcript+' ';
+      else itr+=e.results[i][0].transcript;
+    }
+    if(fin)transcript+=fin;
+    var b=document.getElementById('tbox');
+    b.innerHTML=transcript.replace(/\n/g,'<br>')+(itr?'<span class="interim">['+itr+']</span>':'');
+    b.scrollTop=b.scrollHeight;
+  };
+  recog.onerror=function(){document.getElementById('mic-warn').style.display='flex'};
+  recog.onend=function(){if(isRec)try{recog.start()}catch(e){}};
+  try{recog.start()}catch(e){document.getElementById('mic-warn').style.display='flex'}
+}
+
+function pauseRec(){
+  isRec=false;if(recog)try{recog.stop()}catch(e){}
+  document.getElementById('rdot').className='dot';
+  document.getElementById('rstat').textContent='Paused';
+  document.getElementById('btn-rec').textContent='▶ Resume';
+}
+
+function getAtts(){return Array.from(document.querySelectorAll('#att-tags .tag')).map(function(t){return t.textContent.replace('×','').trim()}).join(', ')}
+function getTasks(){return Array.from(document.querySelectorAll('#tasklist .trow input')).map(function(i){return i.value.trim()}).filter(Boolean).join('\n')}
+
+function generateMOM(){
+  document.getElementById('gen-load').style.display='flex';
+  document.getElementById('mom-out').textContent='';
+  document.getElementById('doc-ok').style.display='none';
+  document.getElementById('doc-err').style.display='none';
+  var company=document.getElementById('m-co').value||'ZNL Bearings Pvt. Ltd';
+  var title=document.getElementById('m-title').value;
+  var venue=document.getElementById('m-venue').value;
+  var date=document.getElementById('m-date').value;
+  var chair=document.getElementById('m-chair').value||'CEO Sir';
+  var meetNo=document.getElementById('m-no').value;
+  var agenda=document.getElementById('m-agenda').value;
+  var manual=document.getElementById('mnotes').value;
+  var atts=getAtts();var tasks=getTasks();
+  var ea=settings.ea||'EA to CEO';
+  var tx=transcript||'(No transcript captured)';
+  var ds='';try{ds=new Date(date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}catch(e){ds=date}
+  var td='';try{td=new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}catch(e){td=new Date().toDateString()}
+
+  var prompt='You are an expert EA for '+company+'.\nGenerate a complete formal MoM in '+lang+' language. Follow EXACTLY this format:\n\n'+
+company+'\nMinutes of Meeting (MoM)\n\nDate: '+ds+'\nTime: '+mStart+' – '+mEnd+'\nVenue: '+(venue||'Board Room')+'\nChairperson: '+chair+'\nAttendees: '+(atts||'[extract from transcript]')+'\nMeeting No.: '+(meetNo||'N/A')+'\n\nSubject: [write concise subject from discussion]\n\n─────────────────────────────\n\nTasks / Responsibilities Section:\n\n| Task | Assigned To | Target Date |\n|------|-------------|-------------|\n[all action items here]\n\n─────────────────────────────\n\nKey Discussion Points:\n\n1. [Person Name] on [Topic]:\n   o [point]\n   o [point]\n2. [Next topic]:\n   o [point]\n[all topics covered]\n\n─────────────────────────────\n\nMeeting Adjourned: '+mEnd+'\n\nMinutes Prepared by & submission date: '+ea+' – '+td+'\n\nApproved by: '+chair+'\n\n---\nAGENDA PROVIDED: '+(agenda||'N/A')+'\nTRANSCRIPT (mixed English/Hindi/Gujarati): '+tx.slice(0,3500)+'\nMANUAL NOTES: '+(manual||'None')+'\nACTION ITEMS NOTED: '+(tasks||'extract from transcript')+'\n\nExtract everything from transcript intelligently. Write complete MOM in '+lang+'. Output ONLY the MOM document, nothing else.';
+
+  fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,messages:[{role:'user',content:prompt}]})
+  })
+  .then(function(r){return r.json()})
+  .then(function(data){
+    curMOM=(data.content&&data.content[0]&&data.content[0].text)||'Error generating MOM.';
+    document.getElementById('mom-out').textContent=curMOM;
+    history.unshift({id:Date.now(),title:title,date:date,company:company,mom:curMOM});
+    try{localStorage.setItem('znl_h',JSON.stringify(history.slice(0,50)))}catch(e){}
+  })
+  .catch(function(err){document.getElementById('mom-out').textContent='Error: '+err.message})
+  .finally(function(){document.getElementById('gen-load').style.display='none'});
+}
+
+function saveGDocs(){
+  var url=localStorage.getItem('znl_wh');
+  if(!url||!url.includes('script.google.com')){
+    document.getElementById('doc-err').textContent='⚠ Setup tab mein Google Apps Script URL pehle daalo.';
+    document.getElementById('doc-err').style.display='flex';return;
+  }
+  if(!curMOM){alert('MOM nahi hai.');return}
+  document.getElementById('doc-ok').style.display='none';document.getElementById('doc-err').style.display='none';
+  fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({mom:curMOM,title:document.getElementById('m-title').value+' - '+document.getElementById('m-date').value,company:document.getElementById('m-co').value})
+  })
+  .then(function(r){return r.json()})
+  .then(function(d){
+    if(d.success){
+      document.getElementById('doc-ok').innerHTML='✓ Saved! <a href="'+d.docUrl+'" target="_blank" style="color:var(--grn);font-weight:600;margin-left:6px">Google Docs mein kholo →</a>';
+      document.getElementById('doc-ok').style.display='flex';
+    }else throw new Error(d.error||'Unknown error');
+  })
+  .catch(function(err){document.getElementById('doc-err').textContent='Error: '+err.message;document.getElementById('doc-err').style.display='flex'});
+}
+
+function dlDoc(){
+  if(!curMOM)return;
+  var html='<html><head><meta charset="UTF-8"><style>body{font-family:Calibri,sans-serif;font-size:11pt;line-height:1.6;margin:2cm 2.5cm}table{border-collapse:collapse;width:100%}td,th{border:1px solid #999;padding:5px 9px}</style></head><body>'+
+    curMOM.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>')+'</body></html>';
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([html],{type:'application/msword'}));
+  a.download=(document.getElementById('m-title').value||'MOM')+'_'+document.getElementById('m-date').value+'.doc';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+}
+
+function cpMOM(){if(!curMOM)return;navigator.clipboard.writeText(curMOM).then(function(){alert('Copied!')})}
+
+function renderHist(){
+  var l=document.getElementById('hist-list');
+  if(!history.length){l.innerHTML='<p style="color:var(--t3);font-size:13px">Koi history nahi.</p>';return}
+  l.innerHTML=history.slice(0,20).map(function(h){
+    return'<div class="hi" onclick="loadMOM('+h.id+')"><div class="hm">'+(h.date||'')+' · '+(h.company||'')+'</div><div class="ht">'+(h.title||'Untitled')+'</div></div>';
+  }).join('');
+}
+function loadMOM(id){
+  var item=history.filter(function(h){return h.id===id})[0];if(!item)return;
+  curMOM=item.mom;
+  document.getElementById('m-title').value=item.title;
+  document.getElementById('m-co').value=item.company;
+  document.getElementById('m-date').value=item.date;
+  document.getElementById('mom-out').textContent=item.mom;
+  for(var i=1;i<=3;i++)document.getElementById('pn'+i).style.display=i===3?'block':'none';
+  document.getElementById('st1').className='si dn';
+  document.getElementById('st2').className='si dn';
+  document.getElementById('st3').className='si on';
+  showTab('mtg');
+}
+
+function setSt(k,v){settings[k]=v;try{localStorage.setItem('znl_s',JSON.stringify(settings))}catch(e){}}
+function saveWH(){var u=document.getElementById('wh').value.trim();try{localStorage.setItem('znl_wh',u)}catch(e){}showWHst(u)}
+function showWHst(u){
+  var el=document.getElementById('wh-st');
+  if(u&&u.includes('script.google.com')){el.style.color='var(--grn)';el.textContent='✓ Webhook saved!'}
+  else if(u){el.style.color='var(--red)';el.textContent='✗ Valid URL nahi lagti'}
+  else el.textContent='';
+}
+function cpScript(){navigator.clipboard.writeText(document.getElementById('gsc').textContent).then(function(){alert('Script copied!')})}
+</script>
+</body>
+</html>
